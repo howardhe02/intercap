@@ -33,13 +33,8 @@ const WeatherWidget = ({ cityId, weatherData, forecastData }) => {
       const dates = forecastData.list.map((item) => item.dt_txt.split(" ")[0]);
       const uniqueDates = [...new Set(dates)].slice(0, 5);
       setForecastDates(uniqueDates);
-      if (uniqueDates.length > 0) {
-        setSelectedDate(uniqueDates[0]); // Default to the first date
-      } else {
-        setSelectedDate(null);
-      }
+      setSelectedDate(uniqueDates.length > 0 ? uniqueDates[0] : null);
     } else {
-      // If no forecastData, reset these values
       setForecastDates([]);
       setSelectedDate(null);
     }
