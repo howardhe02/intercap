@@ -34,8 +34,8 @@ src/
 ## **Installation**
 1. **Clone the repository**
    ```bash
-   https://github.com/howardhe02/intercap.git
-   cd intercap
+   https://github.com/howardhe02/weather-dashboard.git
+   cd weather-dashboard
    ```
 
 2. **Install dependencies**
