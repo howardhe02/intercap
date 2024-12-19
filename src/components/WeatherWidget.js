@@ -8,10 +8,15 @@ const WeatherWidget = ({ cityId, weatherData, forecastData }) => {
   const [forecastDates, setForecastDates] = useState([]);
   const [selectedDate, setSelectedDate] = useState(null);
 
+  // Reset forecast state when city changes
+  useEffect(() => {
+    setShowForecast(false);
+    setForecastDates([]);
+    setSelectedDate(null);
+  }, [cityId]);
+
   const handleShowForecast = () => {
-    if (!forecastData) {
-      dispatch(fetchForecast(cityId));
-    }
+    dispatch(fetchForecast(cityId));
     setShowForecast(true);
   };
 
@@ -26,23 +31,28 @@ const WeatherWidget = ({ cityId, weatherData, forecastData }) => {
   useEffect(() => {
     if (forecastData && forecastData.list) {
       const dates = forecastData.list.map((item) => item.dt_txt.split(" ")[0]);
-      const uniqueDates = [...new Set(dates)].slice(0, 5); // Take first 5 unique dates
+      const uniqueDates = [...new Set(dates)].slice(0, 5);
       setForecastDates(uniqueDates);
       if (uniqueDates.length > 0) {
         setSelectedDate(uniqueDates[0]); // Default to the first date
+      } else {
+        setSelectedDate(null);
       }
+    } else {
+      // If no forecastData, reset these values
+      setForecastDates([]);
+      setSelectedDate(null);
     }
   }, [forecastData]);
 
   // Filter forecast entries by selected date
   const filteredForecast =
-    forecastData && forecastData.list
+    forecastData && forecastData.list && selectedDate
       ? forecastData.list.filter((item) => item.dt_txt.startsWith(selectedDate))
       : [];
 
   // Helper function to format YYYY-MM-DD to a more readable date
   const formatDate = (dateStr) => {
-    // dateStr format: "YYYY-MM-DD"
     const dateObj = new Date(dateStr);
     return dateObj.toLocaleDateString(undefined, {
       month: "short",
@@ -89,19 +99,21 @@ const WeatherWidget = ({ cityId, weatherData, forecastData }) => {
               </button>
             </div>
 
-            <div className="mb-3">
-              {forecastDates.map((date) => (
-                <button
-                  key={date}
-                  className={`btn me-2 mb-2 ${
-                    selectedDate === date ? "btn-secondary" : "btn-light"
-                  }`}
-                  onClick={() => setSelectedDate(date)}
-                >
-                  {formatDate(date)}
-                </button>
-              ))}
-            </div>
+            {forecastDates.length > 0 && (
+              <div className="mb-3">
+                {forecastDates.map((date) => (
+                  <button
+                    key={date}
+                    className={`btn me-2 mb-2 ${
+                      selectedDate === date ? "btn-secondary" : "btn-light"
+                    }`}
+                    onClick={() => setSelectedDate(date)}
+                  >
+                    {formatDate(date)}
+                  </button>
+                ))}
+              </div>
+            )}
 
             <div className="table-responsive">
               <table className="table table-bordered table-hover">
@@ -138,6 +150,13 @@ const WeatherWidget = ({ cityId, weatherData, forecastData }) => {
                       </tr>
                     );
                   })}
+                  {filteredForecast.length === 0 && (
+                    <tr>
+                      <td colSpan="6" className="text-center">
+                        No forecast data available for this date.
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>
